@@ -29,7 +29,7 @@ app.post('/submit', async (req, res) => {
 
     // 2. Send confirmation email to user
     await transporter.sendMail({
-      from: `"Your Academy" <${process.env.EMAIL_USER}>`,
+      from: `"Black PantherKan Acadamey Of Sports And martial Arts" <${process.env.EMAIL_USER}>`,
       to: formData.email,
       subject: 'Thanks for contacting us!',
       text: `Hi ${formData.name},\n\nThank you for reaching out. We have received your message:\n\n"${formData.message}"\n\nWe'll get back to you soon!\n\n- Black Pantherkan`
