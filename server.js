@@ -25,7 +25,7 @@ app.post('/submit', async (req, res) => {
 
   try {
     // 1. Send to Google Sheets
-    await axios.post('https://script.google.com/macros/s/AKfycbyomAcQXcw2Zg5qIhsDewDnIvFgDgsPRHQ3_u1nSAM/dev', formData);
+    await axios.post('https://script.google.com/macros/s/AKfycbxGygnY-ihMBV76FN0iCViiDI9OiXbIkfl7appCE4vHMatyE7LLOI3jXGu8WnZTCyRK/exec', formData);
 
     // 2. Send confirmation email to user
     await transporter.sendMail({
