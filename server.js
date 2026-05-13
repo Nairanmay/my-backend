@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // Paste your NEW Google Apps Script deployment URL here
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzM19O5uUvHXk7UP563k1p9y2wAKFCNs2f7-THoymjjwJIm1hP5jnD4AMywHkyOF1pYHA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxaHO93IhUGeiICupoC63Ly7UkQ7UZqMTcAPgP1OLYLWG416PmFPv4imwgRG44i1Of79A/exec';
 
 app.post('/submit', async (req, res) => {
   try {
