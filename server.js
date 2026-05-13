@@ -2,78 +2,70 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const nodemailer = require('nodemailer');
 
 const app = express();
-const PORT = process.env.PORT || 10000; // Use 10000 for Render
+const PORT = process.env.PORT || 10000;
 
 app.use(cors());
 app.use(express.json());
 
-// Optimized Transporter for Cloud Hosting
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // Use STARTTLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
+// Paste your NEW Google Apps Script deployment URL here
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7NVz0kgYYs-dpjULHCk-OyhRH0el6coahDlNWj6j6a5NtUupVeYIahOS_t8bGpGwFwA/exec';
 
 app.post('/submit', async (req, res) => {
-  const formData = req.body;
-  console.log('📥 Received form data:', formData);
-
   try {
-    // 1. Send to Google Sheets FIRST (Critical Action)
-    await axios.post('https://script.google.com/macros/s/AKfycbxGygnY-ihMBV76FN0iCViiDI9OiXbIkfl7appCE4vHMatyE7LLOI3jXGu8WnZTCyRK/exec', formData);
-    console.log('✅ Google Sheets updated');
-
-    // 2. Fire emails in the background
-    // We do NOT 'await' these so the user gets an instant response
-    sendEmails(formData);
-
-    // 3. Respond to the user immediately
-    res.status(200).json({ success: true, message: 'Form submitted successfully!' });
-
+    console.log('📥 Received:', req.body.name);
+    const response = await axios.post(GOOGLE_SCRIPT_URL, req.body);
+    if (response.data.status === 'success') {
+      console.log('✅ Sheet + Emails handled by Google.');
+      res.status(200).json({ success: true, message: 'Form submitted!' });
+    } else {
+      throw new Error(response.data.message);
+    }
   } catch (error) {
-    console.error('❌ Critical Error:', error.message);
-    res.status(500).json({ success: false, message: 'Something went wrong', error: error.message });
+    console.error('❌ Error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// Helper function to handle emails without blocking the main response
-async function sendEmails(formData) {
-  const userMailOptions = {
-    from: `"Black PantherKan Academy" <${process.env.EMAIL_USER}>`,
-    to: formData.email,
-    subject: 'Thank You for Contacting Black PantherKan!',
-    text: `Hi ${formData.name}, thank you for reaching out...`,
-    html: `<div style="font-family: Arial;"><h2>Hi ${formData.name}!</h2><p>We received your message: <i>"${formData.message}"</i></p></div>`
-  };
-
-  const adminMailOptions = {
-    from: `"Form Bot" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_USER,
-    subject: '📨 New Form Submission',
-    html: `<h3>New Lead: ${formData.name}</h3><p>Email: ${formData.email}</p><p>Message: ${formData.message}</p>`
-  };
-
-  try {
-    await Promise.all([
-      transporter.sendMail(userMailOptions),
-      transporter.sendMail(adminMailOptions)
-    ]);
-    console.log('📧 Emails sent successfully');
-  } catch (err) {
-    console.error('📧 Mailer Background Error:', err.message);
-  }
-}
-
 app.get('/', (req, res) => res.send('✅ Backend is running'));
+app.listen(PORT, () => console.log(`🚀 Server active on port ${PORT}`));
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+// require('dotenv').config();
+// const express = require('express');
+// const cors = require('cors');
+// const axios = require('axios');
+
+// const app = express();
+// const PORT = process.env.PORT || 10000;
+
+// app.use(cors());
+// app.use(express.json());
+
+// // PASTE YOUR NEW DEPLOYMENT URL FROM STEP 1 HERE
+// const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7NVz0kgYYs-dpjULHCk-OyhRH0el6coahDlNWj6j6a5NtUupVeYIahOS_t8bGpGwFwA/exec';
+
+// app.post('/submit', async (req, res) => {
+//   try {
+//     console.log('📥 Forwarding submission to Google Script...');
+    
+//     // Node.js sends the data to Google. 
+//     // Google Script then saves it AND sends the emails.
+//     const response = await axios.post(GOOGLE_SCRIPT_URL, req.body);
+
+//     if (response.data.status === 'success') {
+//       console.log('✅ All tasks (Sheet + Emails) completed by Google Script.');
+//       res.status(200).json({ success: true, message: 'Success!' });
+//     } else {
+//       throw new Error(response.data.message);
+//     }
+//   } catch (error) {
+//     console.error('❌ Error:', error.message);
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// });
+
+// app.get('/', (req, res) => res.send('✅ Backend is running'));
+
+// app.listen(PORT, () => console.log(`🚀 Server active on port ${PORT}`));
